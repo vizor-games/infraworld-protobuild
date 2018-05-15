@@ -1,0 +1,44 @@
+# Folder being searched for *.proto files.
+#
+# Path can be either absolute, or relative to the config.yml path.
+proto_root: '/path/to/proto'
+
+# Folder, where generated files will be put.
+#
+# Path can be either absolute, or relative to the config.yml path.
+gen_root: '/path/to/gen'
+
+# Path to the protoc and grpc plugins, being used for code generation, such as:
+#  - protoc
+#  - protoc-gen-go
+#  - grpc_cpp_plugin
+#  - grpc_csharp_plugin
+#  - grpc_node_plugin
+#
+# You may build these programs using build scripts from the Infraworld Runtime as well as use installed programs.
+# Path is absolute.
+programs_root: '/path/to/GrpcPrograms'
+
+# Supported by protoc: [cpp, csharp, js, objc, php, python, ruby]
+# Supported by protoc-gen-go: go
+# Supported by protoc-gen-java: java
+languages:
+  - cpp
+  - go
+
+# Possible extensions of proto files
+extensions:
+  - proto
+  - prt
+
+# Regenerate all (yes) or just changes (no)
+force: no
+
+# Generate both GRPC transport code and proto-buffers (yes), or just proto-buffers (no)
+transport: yes
+
+# Do verbose output of anything (yes) or be silent (no)
+verbose: no
+
+# Wipe generated artifacts from missing *.proto files or unused languages
+wipe: yes

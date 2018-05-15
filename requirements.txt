@@ -1,0 +1,2 @@
+colorama
+ruamel.yaml==0.15
