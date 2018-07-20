@@ -15,7 +15,7 @@
 #
 import json
 import os
-import ruamel.yaml as yaml
+import yaml
 
 from src.util import Misc
 from deepdiff import DeepDiff
@@ -77,5 +77,5 @@ class Config:
 
         with open(path, 'r') as stream:
             # must loading with version 1.1 compatibility to use boolean flags ('yes', 'on', etc.)
-            yaml_config = yaml.safe_load(stream.read(), version=(1, 1))
+            yaml_config = yaml.load(stream)
             return Config(yaml_config), changed
