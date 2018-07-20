@@ -13,11 +13,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 #
-import json
 import os
 import platform
 import ruamel.yaml as yaml
 import zlib
+import json
 
 
 class TypeCoercer:
@@ -63,11 +63,11 @@ class PathConverter:
         :return: suffix we need to add as -I option to protoc, there will be no suffix if
                     path is in proto_root.
         """
-        if os.sep not in path:
-            return ''
-        else:
+        if os.sep in path:
             sep_index = path.rfind(os.sep)
             return os.path.join(os.sep, path[:sep_index])
+        else:
+            return ''
 
 
 class Misc:
@@ -97,29 +97,6 @@ class Misc:
                 prev = zlib.crc32(eachLine, prev)
 
         return str(prev & 0xFFFFFFFF)
-
-    @staticmethod
-    def load_config(path: str):
-        if not os.path.exists(path):
-            raise FileExistsError(f'Config file {path} does not exist!')
-
-        old_digest = {}
-        new_digest = {path: Misc.crc_of_file(path)}
-
-        config_digest = os.path.join(os.path.dirname(path), '.config.digest')
-        if os.path.exists(config_digest):
-            with open(config_digest, 'r') as cache:
-                old_digest = json.load(cache)
-
-        with open(config_digest, 'w') as cache:
-            cache.write(json.dumps(new_digest, indent=4))
-
-        # changed if digests differs
-        changed = (new_digest[path] != old_digest.get(path, ''))
-
-        with open(path, 'r') as stream:
-            # must loading with version 1.1 compatibility to use boolean flags ('yes', 'on', etc.)
-            return yaml.round_trip_load(stream.read(), version='1.1'), changed
 
     @staticmethod
     def change_ext_recursive(root_path: str, ext: str, new_ext: str):

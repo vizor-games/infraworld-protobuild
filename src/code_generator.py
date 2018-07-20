@@ -26,7 +26,7 @@ class CodeGenerator:
         self.languages = config['languages']
         self.proto_root = os.path.join(root_dir, config['proto_root'])
         self.gen_root = os.path.join(root_dir, config['gen_root'])
-        self.config = config.copy()
+        self.config = config
 
         if not os.path.isabs(self.gen_root):
             self.gen_root = os.path.join(root_dir, self.gen_root)
@@ -38,7 +38,7 @@ class CodeGenerator:
             os.mkdir(self.gen_root)
 
         # destroy unused language folder (ones, not named in config)
-        if config.get('wipe', False):
+        if config['wipe']:
             self.wipe_unused_language_folders()
 
     def wipe_unused_language_folders(self):
@@ -56,7 +56,7 @@ class CodeGenerator:
 
         tasks = []
 
-        if self.config.get('verbose', False):
+        if self.config['verbose']:
             files_str = f'Total num files {len(all_files)}, num changed: {len(changed_files)}'
             if self.config.get('force', False):
                 files_str += ', running in FORCE mode'

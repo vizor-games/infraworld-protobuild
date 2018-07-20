@@ -19,7 +19,7 @@ import os
 from src.util import PathConverter, Misc
 
 
-class DirHasher:
+class DirHashCalculator:
     def __init__(self, force: bool = False):
         self.force = force
 
@@ -53,16 +53,16 @@ class DirHasher:
     def get_changed(self, base_dir, matcher):
         digest_path = os.path.join(base_dir, '.dir.digest')
 
-        old_digest = DirHasher.load_digest(digest_path)
+        old_digest = DirHashCalculator.load_digest(digest_path)
         new_digest = {}
 
         changed = []
-        for matching in DirHasher.get_matching(base_dir, matcher):
+        for matching in DirHashCalculator.get_matching(base_dir, matcher):
             new_hash = Misc.crc_of_file(os.path.join(base_dir, matching))
             new_digest[matching] = new_hash
 
             if new_hash != old_digest.get(matching, '') or self.force:
                 changed.append(matching)
 
-        DirHasher.save_digest(digest_path, new_digest)
+        DirHashCalculator.save_digest(digest_path, new_digest)
         return changed

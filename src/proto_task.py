@@ -38,7 +38,7 @@ class ProtoTask:
         if not os.path.exists(abs_proto_file):
             raise SystemError(f"{self.proto_file} does not exist in {proto_root}")
 
-        programs_root = config.get('programs_root')
+        programs_root = config['programs_root']
 
         if not programs_root:
             raise Exception("programs_root config variable should be defined")
@@ -47,14 +47,10 @@ class ProtoTask:
             raise Exception(f"programs_root: {programs_root} is not a directory")
 
         include_dir = proto_root + PathConverter.include_suffix(self.proto_file)
-        path_to_protoc = f"{os.path.join(programs_root, Misc.add_exec_suffix('protoc'))}"
+        path_to_proto_compiler = f"{os.path.join(programs_root, Misc.add_exec_suffix('protoc'))}"
 
-        gen_transport: bool = config.get('transport', False)
-
-        options = [
-            path_to_protoc,
-            f'-I={include_dir}'
-        ]
+        gen_transport = config['transport']
+        options = [path_to_proto_compiler, f'-I={include_dir}']
 
         path_to_plugin = os.path.join(programs_root, Misc.add_exec_suffix(Misc.plugin_for_lang(self.lang)))
 
@@ -78,7 +74,7 @@ class ProtoTask:
         # finally add the file to generate wrapper to
         options.append(abs_proto_file)
 
-        if config.get('verbose', False):
+        if config['verbose']:
             print(Fore.MAGENTA + f">> {' '.join(options)}")
 
         subprocess.call(options)
