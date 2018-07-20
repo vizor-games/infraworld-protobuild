@@ -15,20 +15,53 @@
 #
 import os
 import platform
-import ruamel.yaml as yaml
 import zlib
-import json
+
+
+class DictDiffView:
+    __diff_a = object()
+    __diff_b = object()
+
+    def __init__(self, a: dict, b: dict):
+        self.a = a
+        self.b = b
+
+    def __contains__(self, key):
+        item_a = self.a.get(key, DictDiffView.__diff_a)
+        item_b = self.b.get(key, DictDiffView.__diff_b)
+
+        return item_a == item_b
 
 
 class TypeCoercer:
     @staticmethod
-    def assert_type_all(items: list, t: type, throwable_type: type = TypeError):
-        # compare using ==, because t is't literal
-        violations = list(filter(lambda i: type(i) != t, items))
+    def assert_type_list(items: list, t: type, throwable_type: type = TypeError):
+        violations = []
+
+        for i in items:
+            type_of_i = type(i)
+
+            if type_of_i != t:
+                violations = f" > For item \"{str(i)}\" expected type \"{t.__name__}\", got \"{type_of_i.__name__}\""
 
         if violations:
-            errors = [f"{str(v)}(got {type(v).__name__}, expected {t.__name__})" for v in violations]
-            raise throwable_type(f"Got {len(violations)} type violations: {', '.join(errors)}")
+            raise throwable_type('Got ' + str(len(violations)) + ' type violations: ' + '\n'.join(violations))
+
+    @staticmethod
+    def assert_type_map(items: dict, tk: type, tv: type, throwable_type: type = TypeError):
+        violations = []
+        for k, v in items.items():
+            type_of_k = type(k)
+            type_of_v = type(v)
+
+            if type_of_k != tk:
+                violations += f" > For key \"{str(k)}\" expected type \"{tk.__name__}\", got \"{type_of_k.__name__}\""
+
+            if type_of_v != tv:
+                violations += f" > For value \"{str(k)}\" expected type \"{tk.__name__}\", got \"{type_of_k.__name__}\""
+
+        if violations:
+            raise throwable_type('Got ' + str(len(violations)) + ' type violations: ' + '\n'.join(violations))
 
 
 class PathConverter:
@@ -45,12 +78,12 @@ class PathConverter:
 
     @staticmethod
     def all_to_relative(base_dir: str, paths: list):
-        TypeCoercer.assert_type_all(paths, str)
+        TypeCoercer.assert_type_list(paths, str)
         return [PathConverter.to_relative(base_dir, p) for p in paths]
 
     @staticmethod
     def all_to_absolute(base_dir: str, paths: list):
-        TypeCoercer.assert_type_all(paths, str)
+        TypeCoercer.assert_type_list(paths, str)
         return [PathConverter.to_absolute(base_dir, p) for p in paths]
 
     @staticmethod

@@ -52,7 +52,7 @@ class CodeGenerator:
                     os.remove(abs_unused_path)
 
     def gen_all(self, changed_files: list, all_files: list, matcher):
-        TypeCoercer.assert_type_all(changed_files, str)
+        TypeCoercer.assert_type_list(changed_files, str)
 
         tasks = []
 
