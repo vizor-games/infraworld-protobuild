@@ -21,7 +21,7 @@ import os
 import re
 
 from src.code_generator import CodeGenerator
-from src.dir_hasher import DirHashCalculator
+from src.dir_hash_calculator import DirHashCalculator
 from src.util import PathConverter, Misc
 from src.config import Config
 
