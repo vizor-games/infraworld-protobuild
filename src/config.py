@@ -23,8 +23,16 @@ from pprint import pprint
 
 
 class Config:
-    def __init__(self, options: dict):
+    def __init__(self, config_path: str, options: dict):
         self.options = options
+
+        # !!! Now config may only reside in the working directory.
+        # Change the following lines if the rule will alter
+        self.working_directory = os.path.dirname(config_path)
+
+        programs_root = options['programs_root']
+        if not os.path.isabs(programs_root):
+            options['programs_root'] = os.path.abspath(os.path.join(self.working_directory, programs_root))
 
     def __str__(self):
         return json.dumps(self.options, indent=4)
@@ -78,4 +86,4 @@ class Config:
         with open(path, 'r') as stream:
             # must loading with version 1.1 compatibility to use boolean flags ('yes', 'on', etc.)
             yaml_config = yaml.load(stream)
-            return Config(yaml_config), changed
+            return Config(path, yaml_config), changed

@@ -22,7 +22,6 @@ import re
 
 from src.code_generator import CodeGenerator
 from src.dir_hash_calculator import DirHashCalculator
-from src.util import PathConverter
 from src.config import Config
 
 
@@ -31,28 +30,28 @@ def main():
     start_time = time.time()
 
     p = argparse.ArgumentParser(description=f"Generating from *.proto files. Enabled")
-    p.add_argument('--config',
-                   default=PathConverter.to_absolute(os.path.dirname(os.path.realpath(__file__)), 'config.yml')
-                   )
+    p.add_argument('--workdir', default=os.path.realpath(__file__))
     parse_args = p.parse_args()
 
+    working_directory = parse_args.workdir
+    config_path = os.path.join(working_directory, 'config.yml')
+
     # load config
-    config, config_changed = Config.load(parse_args.config)
+    config, config_changed = Config.load(config_path)
 
     # display config file
-    print(f'>>> Config >>>\n{str(config)}')
+    print(f'Working directory: {working_directory}')
+    print(f'Config: {config_path}\n{str(config)}')
     proto_root = config['proto_root']
 
     # then compile our matcher
     pattern = "(^.+)\\.{}$".format('|'.join(config['extensions']))
     matcher = re.compile(pattern)
 
-    root_dir = os.path.dirname(parse_args.config)
-
     if os.path.isabs(proto_root):
         abs_proto_folder = proto_root
     else:
-        abs_proto_folder = os.path.join(root_dir, proto_root)
+        abs_proto_folder = os.path.join(working_directory, proto_root)
 
     if not os.path.isdir(abs_proto_folder):
         raise Exception(f"proto_root: \"{abs_proto_folder}\" is not a valid path")
@@ -63,7 +62,7 @@ def main():
                     dh.get_matching(abs_proto_folder, matcher),
                     matcher)
 
-    CodeGenerator(root_dir, config).gen_all(*codegen_args)
+    CodeGenerator(working_directory, config).gen_all(*codegen_args)
 
     elapsed_time = round(time.time() - start_time, 3)
     print(colorama.Fore.WHITE + f"Build done in {elapsed_time} s")
