@@ -131,7 +131,7 @@ class CodeGenerator:
             shutil.rmtree(self.gen_root)
             raise SystemError('An error occurred when tried to generate code: %s' % ex)
 
-        # if some 'cpp' tasks were done, we should rename all 'cc' files into 'cpp'
+        # if some 'cpp' tasks were done, we should rename all 'cc' files into 'hpp'
         if [t for t in tasks if t.lang == 'cpp']:
             print(Fore.YELLOW + "Renaming generated C++ files from '*.cc' -> '*.hpp'")
             Misc.change_ext_recursive(os.path.join(self.gen_root, 'cpp'), 'cc', 'hpp')
