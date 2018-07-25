@@ -22,7 +22,7 @@ import re
 
 from src.code_generator import CodeGenerator
 from src.dir_hash_calculator import DirHashCalculator
-from src.util import PathConverter, Misc
+from src.util import PathConverter
 from src.config import Config
 
 
@@ -30,32 +30,24 @@ def main():
     # remember time
     start_time = time.time()
 
+    p = argparse.ArgumentParser(description=f"Generating from *.proto files. Enabled")
+    p.add_argument('--config',
+                   default=PathConverter.to_absolute(os.path.dirname(os.path.realpath(__file__)), 'config.yml')
+                   )
+    parse_args = p.parse_args()
+
     # load config
-    root_dir = os.path.dirname(os.path.realpath(__file__))
-    config, config_changed = Config.load(PathConverter.to_absolute(root_dir, 'config.yml'))
+    config, config_changed = Config.load(parse_args.config)
+
+    # display config file
+    print(f'>>> Config >>>\n{str(config)}')
+    proto_root = config['proto_root']
 
     # then compile our matcher
     pattern = "(^.+)\\.{}$".format('|'.join(config['extensions']))
     matcher = re.compile(pattern)
 
-    # parse CLI
-    pretty_languages = [Misc.pretty_language_name(l) for l in config['languages']]
-    p = argparse.ArgumentParser(description=f"Generating from *.proto files. Enabled: {', '.join(pretty_languages)}.")
-
-    # add replaceable options into our command line parser
-    rep_options = config.get_replaceable_options()
-
-    help_message = 'Comments were stripped, see config.yml for help'
-    for k, v in rep_options.items():
-        p.add_argument(f'--{k.lower()}', action='store_true', default=v, help=help_message)
-
-    # replace config items
-    parse_args = p.parse_args().__dict__
-    config.update(parse_args)
-
-    # display config file
-    print(f'>>> Config >>>\n{str(config)}')
-    proto_root = config['proto_root']
+    root_dir = os.path.dirname(parse_args.config)
 
     if os.path.isabs(proto_root):
         abs_proto_folder = proto_root

@@ -174,3 +174,14 @@ class Misc:
     @staticmethod
     def to_camel_case(snake_str: str):
         return ''.join(x.title() for x in (snake_str.split('_')))
+
+    @staticmethod
+    def get_ue4_os():
+        if platform.machine().endswith('64'):
+            return {
+                'darwin': 'Mac',
+                'linux': 'Linux',
+                'windows': 'Win64'
+            }.get(platform.system().lower(), None)
+
+        return None

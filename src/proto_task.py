@@ -38,7 +38,7 @@ class ProtoTask:
         if not os.path.exists(abs_proto_file):
             raise SystemError(f"{self.proto_file} does not exist in {proto_root}")
 
-        programs_root = config['programs_root']
+        programs_root = os.path.join(config['programs_root'], Misc.get_ue4_os())
 
         if not programs_root:
             raise Exception("programs_root config variable should be defined")
