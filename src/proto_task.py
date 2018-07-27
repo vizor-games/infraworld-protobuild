@@ -18,6 +18,7 @@ import subprocess
 
 from colorama import Fore
 from src.util import Misc, PathConverter
+from src.config import Config
 
 
 class ProtoTask:
@@ -32,13 +33,13 @@ class ProtoTask:
         self.out_dir = out_dir
         self.proto_file = proto_file
 
-    def run(self, config: dict, proto_root: str):
+    def run(self, config: Config, proto_root: str):
         abs_proto_file = PathConverter.to_absolute(proto_root, self.proto_file)
 
         if not os.path.exists(abs_proto_file):
             raise SystemError(f"{self.proto_file} does not exist in {proto_root}")
 
-        programs_root = config['programs_root']
+        programs_root = os.path.abspath(os.path.join(config['programs_root'], Misc.get_binary_release_os()))
 
         if not programs_root:
             raise Exception("programs_root config variable should be defined")

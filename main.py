@@ -22,45 +22,47 @@ import re
 
 from src.code_generator import CodeGenerator
 from src.dir_hash_calculator import DirHashCalculator
-from src.util import PathConverter, Misc
 from src.config import Config
+from src.util import Misc
 
 
 def main():
     # remember time
     start_time = time.time()
 
+    p = argparse.ArgumentParser(description=f"Generating from *.proto files. Enabled")
+    p.add_argument('--workdir', default=os.path.realpath(__file__))
+    parse_args = p.parse_args()
+
+    working_directory = parse_args.workdir
+    config_path = os.path.join(working_directory, Config.TypicalName)
+
     # load config
-    root_dir = os.path.dirname(os.path.realpath(__file__))
-    config, config_changed = Config.load(PathConverter.to_absolute(root_dir, 'config.yml'))
+    config = Config.load(config_path)
+
+    replaceable_options = config.get_replaceable_options()
+    for k, v in replaceable_options.items():
+        environ_val = os.environ.get(k, str(v).lower())
+
+        if environ_val and replaceable_options[k] != Misc.str_to_bool(environ_val):
+            replaceable_options[k] = Misc.str_to_bool(environ_val)
+
+    config.update(replaceable_options)
+    config_changed = config.is_changed()
+
+    # display config file
+    print(f'Working directory: {working_directory}')
+    print(f'Config: {config_path}\n{str(config)}')
+    proto_root = config['proto_root']
 
     # then compile our matcher
     pattern = "(^.+)\\.{}$".format('|'.join(config['extensions']))
     matcher = re.compile(pattern)
 
-    # parse CLI
-    pretty_languages = [Misc.pretty_language_name(l) for l in config['languages']]
-    p = argparse.ArgumentParser(description=f"Generating from *.proto files. Enabled: {', '.join(pretty_languages)}.")
-
-    # add replaceable options into our command line parser
-    rep_options = config.get_replaceable_options()
-
-    help_message = 'Comments were stripped, see config.yml for help'
-    for k, v in rep_options.items():
-        p.add_argument(f'--{k.lower()}', action='store_true', default=v, help=help_message)
-
-    # replace config items
-    parse_args = p.parse_args().__dict__
-    config.update(parse_args)
-
-    # display config file
-    print(f'>>> Config >>>\n{str(config)}')
-    proto_root = config['proto_root']
-
     if os.path.isabs(proto_root):
         abs_proto_folder = proto_root
     else:
-        abs_proto_folder = os.path.join(root_dir, proto_root)
+        abs_proto_folder = os.path.join(working_directory, proto_root)
 
     if not os.path.isdir(abs_proto_folder):
         raise Exception(f"proto_root: \"{abs_proto_folder}\" is not a valid path")
@@ -71,7 +73,7 @@ def main():
                     dh.get_matching(abs_proto_folder, matcher),
                     matcher)
 
-    CodeGenerator(root_dir, config).gen_all(*codegen_args)
+    CodeGenerator(working_directory, config).gen_all(*codegen_args)
 
     elapsed_time = round(time.time() - start_time, 3)
     print(colorama.Fore.WHITE + f"Build done in {elapsed_time} s")

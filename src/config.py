@@ -16,15 +16,26 @@
 import json
 import os
 import yaml
+import hashlib
+import pathlib as pl
 
-from src.util import Misc
 from deepdiff import DeepDiff
 from pprint import pprint
 
 
 class Config:
-    def __init__(self, options: dict):
+    TypicalName = 'protobuild.yml'
+
+    def __init__(self, config_path: str, options: dict):
         self.options = options
+
+        # !!! Now config may only reside in the working directory.
+        # Change the following lines if the rule will alter
+        self.working_directory = os.path.dirname(config_path)
+
+        programs_root = options['programs_root']
+        if not os.path.isabs(programs_root):
+            options['programs_root'] = os.path.abspath(os.path.join(self.working_directory, programs_root))
 
     def __str__(self):
         return json.dumps(self.options, indent=4)
@@ -56,26 +67,32 @@ class Config:
 
         self.options.update(replacement_options)
 
-    @staticmethod
-    def load(path: str):
-        if not os.path.exists(path):
-            raise FileExistsError(f'Config file {path} does not exist!')
+    def hex_digest(self):
+        config_hash = hashlib.sha256()
+        config_hash.update(str(self).encode('utf-8'))
 
+        return config_hash.hexdigest()
+
+    def is_changed(self):
         old_digest = {}
-        new_digest = {path: Misc.crc_of_file(path)}
 
-        config_digest = os.path.join(os.path.dirname(path), '.config.digest')
-        if os.path.exists(config_digest):
-            with open(config_digest, 'r') as cache:
+        config_path = os.path.join(self.working_directory, Config.TypicalName)
+        config_digest_path = os.path.join(self.working_directory, f'.{pl.Path(Config.TypicalName).stem}.digest')
+
+        if os.path.exists(config_digest_path):
+            with open(config_digest_path, 'r') as cache:
                 old_digest = json.load(cache)
 
-        with open(config_digest, 'w') as cache:
+        new_digest = {config_path: self.hex_digest()}
+        with open(config_digest_path, 'w') as cache:
             cache.write(json.dumps(new_digest, indent=4))
 
         # changed if digests differs
-        changed = (new_digest[path] != old_digest.get(path, ''))
+        changed = (new_digest[config_path] != old_digest.get(config_path, ''))
+        return changed
 
+    @staticmethod
+    def load(path: str):
         with open(path, 'r') as stream:
-            # must loading with version 1.1 compatibility to use boolean flags ('yes', 'on', etc.)
             yaml_config = yaml.load(stream)
-            return Config(yaml_config), changed
+            return Config(path, yaml_config)

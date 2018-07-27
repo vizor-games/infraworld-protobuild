@@ -58,7 +58,7 @@ class DirHashCalculator:
 
         changed = []
         for matching in DirHashCalculator.get_matching(base_dir, matcher):
-            new_hash = Misc.crc_of_file(os.path.join(base_dir, matching))
+            new_hash = Misc.hash_of_file(os.path.join(base_dir, matching))
             new_digest[matching] = new_hash
 
             if new_hash != old_digest.get(matching, '') or self.force:
