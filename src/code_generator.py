@@ -19,10 +19,11 @@ import shutil
 from colorama import Fore
 from src.util import TypeCoercer, Misc
 from src.proto_task import ProtoTask
+from src.config import Config
 
 
 class CodeGenerator:
-    def __init__(self, root_dir: str, config: dict):
+    def __init__(self, root_dir: str, config: 'Config'):
         self.languages = config['languages']
         self.proto_root = os.path.join(root_dir, config['proto_root'])
         self.gen_root = os.path.join(root_dir, config['gen_root'])
@@ -58,11 +59,11 @@ class CodeGenerator:
 
         if self.config['verbose']:
             files_str = f'Total num files {len(all_files)}, num changed: {len(changed_files)}'
-            if self.config.get('force', False):
+            if self.config['force']:
                 files_str += ', running in FORCE mode'
 
             print(Fore.MAGENTA + files_str)
-            [print(Fore.MAGENTA + f'    {f}, changed: {f in changed_files}') for f in all_files]
+            [print(Fore.MAGENTA + f' > {f}, changed: {f in changed_files}') for f in all_files]
 
         for language in self.languages:
             # check whether we has a required plugin

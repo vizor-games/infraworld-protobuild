@@ -1,0 +1,49 @@
+
+# ! Note that you may change working directory via --workdir command line option to provide custom directory being
+# searched for config file. Working directory is also a root directory for all relative paths to the config.
+
+# Folder being searched for *.proto files.
+#
+# Path can be either absolute, or relative to the working directory.
+proto_root: '/path/to/proto'
+
+# Folder, where generated files will be put.
+#
+# Path can be either absolute, or relative to the working directory.
+gen_root: '/path/to/gen'
+
+# Path to the protoc and grpc plugins, being used for code generation. Since these binaries are platform-dependent,
+# the provided path does not include the 'platform' folder suffix, which is:
+# - 'Mac' for Mac OS
+# - 'Linux' for any compatible linux distributive
+# - 'Win64' for x64 windows distributive
+#
+# You may build these programs using build scripts from the Infraworld Runtime as well as use installed programs.
+#
+# Path can be either absolute, or relative to the working directory.
+programs_root: '/path/to/GrpcPrograms'
+
+# Supported by protoc: [cpp, csharp, js, objc, php, python, ruby]
+# Supported by protoc-gen-go: go
+# Supported by protoc-gen-java: java
+languages:
+  - cpp
+  - go
+
+# Possible extensions of proto files
+extensions:
+  - proto
+  - prt
+
+# ! Note that boolean options might be overriden with environment variables.
+# Regenerate all (yes) or just changes (no)
+force: no
+
+# Generate both GRPC transport code and proto-buffers (yes), or just proto-buffers (no)
+transport: yes
+
+# Do verbose output of anything (yes) or be silent (no)
+verbose: no
+
+# Wipe generated artifacts from missing *.proto files or unused languages (yes) or do nothing (no)
+wipe: yes

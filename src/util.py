@@ -15,7 +15,7 @@
 #
 import os
 import platform
-import zlib
+import hashlib
 
 
 class DictDiffView:
@@ -91,7 +91,7 @@ class PathConverter:
         """
         Don't know how, but c++ generator wants the exact location of .proto (file)
         (possibly due to file naming conflict resolution). Since we want completely
-        authoritary way to organize folders, we need to cheat the generator
+        custom way to organize folders, we need to cheat the generator
         :param path: RELATIVE path to *.proto file
         :return: suffix we need to add as -I option to protoc, there will be no suffix if
                     path is in proto_root.
@@ -123,13 +123,14 @@ class Misc:
                 os.mkdir(current_dir)
 
     @staticmethod
-    def crc_of_file(file_name: str):
-        prev = 0
+    def hash_of_file(file_name: str):
+        hash_object = hashlib.sha256()
+
         with open(file_name, 'rb') as file:
             for eachLine in file:
-                prev = zlib.crc32(eachLine, prev)
+                hash_object.update(eachLine)
 
-        return str(prev & 0xFFFFFFFF)
+        return hash_object.hexdigest()
 
     @staticmethod
     def change_ext_recursive(root_path: str, ext: str, new_ext: str):
@@ -176,12 +177,18 @@ class Misc:
         return ''.join(x.title() for x in (snake_str.split('_')))
 
     @staticmethod
-    def get_ue4_os():
-        if platform.machine().endswith('64'):
+    def get_binary_release_os():
+        machine = platform.machine()
+
+        if machine.endswith('64'):
             return {
                 'darwin': 'Mac',
                 'linux': 'Linux',
                 'windows': 'Win64'
             }.get(platform.system().lower(), None)
+        else:
+            raise SystemError(f'Unable to operate on {machine}, 64bit operating system is required')
 
-        return None
+    @staticmethod
+    def str_to_bool(input_str: str):
+        return input_str.lower() == 'true'

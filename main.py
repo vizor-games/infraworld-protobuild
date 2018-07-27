@@ -23,6 +23,7 @@ import re
 from src.code_generator import CodeGenerator
 from src.dir_hash_calculator import DirHashCalculator
 from src.config import Config
+from src.util import Misc
 
 
 def main():
@@ -34,10 +35,20 @@ def main():
     parse_args = p.parse_args()
 
     working_directory = parse_args.workdir
-    config_path = os.path.join(working_directory, 'config.yml')
+    config_path = os.path.join(working_directory, Config.TypicalName)
 
     # load config
-    config, config_changed = Config.load(config_path)
+    config = Config.load(config_path)
+
+    replaceable_options = config.get_replaceable_options()
+    for k, v in replaceable_options.items():
+        environ_val = os.environ.get(k, str(v).lower())
+
+        if environ_val and replaceable_options[k] != Misc.str_to_bool(environ_val):
+            replaceable_options[k] = Misc.str_to_bool(environ_val)
+
+    config.update(replaceable_options)
+    config_changed = config.is_changed()
 
     # display config file
     print(f'Working directory: {working_directory}')
