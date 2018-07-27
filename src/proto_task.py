@@ -14,9 +14,9 @@
 # under the License.
 #
 import os
-import subprocess
 
 from colorama import Fore
+from subprocess import Popen, PIPE
 from src.util import Misc, PathConverter
 from src.config import Config
 
@@ -78,4 +78,14 @@ class ProtoTask:
         if config['verbose']:
             print(Fore.MAGENTA + f">> {' '.join(options)}")
 
-        subprocess.call(options)
+        p = Popen(options, stdin=PIPE, stdout=PIPE, stderr=PIPE)
+        output, err = p.communicate()
+
+        if p.returncode != 0:
+            raise SyntaxError('Unable to convert {} to {}\nInvocation: {}\nReturn code: {}, error: {}'.format(
+                self.proto_file,
+                Misc.pretty_language_name(self.lang),
+                ' '.join(options),
+                p.returncode,
+                err.decode('utf-8')
+            ))
