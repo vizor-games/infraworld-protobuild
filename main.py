@@ -31,7 +31,7 @@ def main():
     start_time = time.time()
 
     p = argparse.ArgumentParser(description=f"Generating from *.proto files. Enabled")
-    p.add_argument('--workdir', default=os.path.realpath(__file__))
+    p.add_argument('--workdir', default=os.path.dirname(os.path.realpath(__file__)))
     parse_args = p.parse_args()
 
     working_directory = parse_args.workdir
