@@ -15,6 +15,7 @@
 #
 import os
 import shutil
+import sys
 
 from colorama import Fore
 from src.util import TypeCoercer, Misc
@@ -37,20 +38,6 @@ class CodeGenerator:
 
         if not os.path.isdir(self.gen_root):
             os.mkdir(self.gen_root)
-
-        # destroy unused language folder (ones, not named in config)
-        if config['wipe']:
-            self.wipe_unused_language_folders()
-
-    def wipe_unused_language_folders(self):
-        for language_folder in os.listdir(self.gen_root):
-            if language_folder not in self.languages:
-                abs_unused_path = os.path.join(self.gen_root, language_folder)
-
-                if os.path.isdir(abs_unused_path):
-                    shutil.rmtree(abs_unused_path)
-                else:
-                    os.remove(abs_unused_path)
 
     def gen_all(self, changed_files: list, all_files: list, matcher):
         TypeCoercer.assert_type_list(changed_files, str)
@@ -129,8 +116,11 @@ class CodeGenerator:
                       Fore.WHITE + Misc.pretty_language_name(t.lang))
 
         except Exception as ex:
-            shutil.rmtree(self.gen_root)
-            raise SystemError('An error occurred when tried to generate code: %s' % ex)
+            if self.config['porcelain']:
+                sys.stderr.write(f'{str(ex)}\n')
+                exit(1)
+            else:
+                raise SystemError('An error occurred when tried to generate code: %s' % ex)
 
         # if some 'cpp' tasks were done, we should rename all 'cc' files into 'hpp'
         if [t for t in tasks if t.lang == 'cpp']:

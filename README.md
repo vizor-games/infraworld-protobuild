@@ -35,7 +35,7 @@ Path can be either absolute, or relative to the working directory.
 * `force` **(boolean)** - Regenerate all (yes) or just changes (no).
 * `transport` **(boolean)** - Generate GRPC transport code for proto-buffers (yes), or just proto-buffers (no).
 * `verbose` **(boolean)** - Do verbose output of anything (yes) or be silent (no).
-* `wipe` **(boolean)** - Wipe generated artifacts from missing *.proto files or unused languages (yes) or do nothing (no).
+* `porcelain` **(boolean)** - Show error messages gently (yes) or as full stack traces (no).
 
 Debugging
 =========

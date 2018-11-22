@@ -47,3 +47,6 @@ verbose: no
 
 # Wipe generated artifacts from missing *.proto files or unused languages (yes) or do nothing (no)
 wipe: yes
+
+# Show error messages gently (yes) or as full stack traces (no).
+porcelain: yes

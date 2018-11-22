@@ -32,7 +32,9 @@ class DirHashCalculator:
             return json.load(cache)
 
     @staticmethod
-    def save_digest(config_file: str, config: dict):
+    def save_digest(base_dir: str, config: dict):
+        config_file = os.path.join(base_dir, '.dir.digest')
+
         with open(config_file, 'w') as cache:
             cache.write(json.dumps(config, indent=4))
 
@@ -64,5 +66,4 @@ class DirHashCalculator:
             if new_hash != old_digest.get(matching, '') or self.force:
                 changed.append(matching)
 
-        DirHashCalculator.save_digest(digest_path, new_digest)
-        return changed
+        return changed, new_digest

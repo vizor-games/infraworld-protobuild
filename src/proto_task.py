@@ -82,10 +82,17 @@ class ProtoTask:
         output, err = p.communicate()
 
         if p.returncode != 0:
-            raise SyntaxError('Unable to convert {} to {}\nInvocation: {}\nReturn code: {}, error: {}'.format(
-                self.proto_file,
-                Misc.pretty_language_name(self.lang),
-                ' '.join(options),
-                p.returncode,
-                err.decode('utf-8')
-            ))
+            if config['porcelain']:
+                raise SyntaxError('Unable to convert {} to {}. Error: {}'.format(
+                    self.proto_file,
+                    Misc.pretty_language_name(self.lang),
+                    err.decode('utf-8')
+                ))
+            else:
+                raise SyntaxError('Unable to convert {} to {}\nInvocation: {}\nReturn code: {}, error: {}'.format(
+                    self.proto_file,
+                    Misc.pretty_language_name(self.lang),
+                    ' '.join(options),
+                    p.returncode,
+                    err.decode('utf-8')
+                ))

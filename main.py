@@ -69,11 +69,14 @@ def main():
 
     dh = DirHashCalculator(config['force'] or config_changed)
 
-    codegen_args = (dh.get_changed(abs_proto_folder, matcher),
-                    dh.get_matching(abs_proto_folder, matcher),
-                    matcher)
+    changed, new_digest = dh.get_changed(abs_proto_folder, matcher)
+    matching = dh.get_matching(abs_proto_folder, matcher)
 
-    CodeGenerator(working_directory, config).gen_all(*codegen_args)
+    code_gen_args = (changed, matching, matcher)
+    CodeGenerator(working_directory, config).gen_all(*code_gen_args)
+
+    # The downside is that while there was any unsuccessfully built files, other ones will be re-compiled as well
+    dh.save_digest(abs_proto_folder, new_digest)
 
     elapsed_time = round(time.time() - start_time, 3)
     print(colorama.Fore.WHITE + f"Build done in {elapsed_time} s")
