@@ -29,6 +29,8 @@ Path can be either absolute, or relative to the working directory.
 * `languages` **(array)** - Languages to generate wrappers for. Supported by protoc: [cpp, csharp, js, objc, php, python, ruby],
  you may add additional plugins for extra languages.
 * `extensions` **(array)** - Possible extensions of proto files.
+* `protoc_options` **(array)** - Possible add optional flags for protoc. 
+* `protoc_options_go` **(array)** - Possible add optional flags for protoc for Go. 
 
 *Note that boolean options might be overriden with environment variables*
 
