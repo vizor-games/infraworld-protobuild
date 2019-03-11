@@ -55,7 +55,15 @@ class ProtoTask:
 
         path_to_plugin = os.path.join(programs_root, Misc.add_exec_suffix(Misc.plugin_for_lang(self.lang)))
 
+        if 'protoc_options' in config.options.keys():
+            for opt in self.getOptions(config["protoc_options"]):
+                options.append(opt)
+            
         if self.lang == 'go':
+            if 'protoc_options_go' in config.options.keys():
+                for opt in self.getOptions(config["protoc_options_go"]):
+                    options.append(opt)
+
             options.append(f'--plugin={path_to_plugin}')
 
             if gen_transport:
@@ -96,3 +104,16 @@ class ProtoTask:
                     p.returncode,
                     err.decode('utf-8')
                 ))
+
+    def getOptions(self, options: dict): 
+        result = []
+        for opt in options:
+            if type(opt) != str:
+                continue
+
+            if '@out_dir' in opt:
+                opt = opt.replace("@out_dir", f"{self.out_dir}")
+            result.append(os.path.expandvars(opt))
+
+        return result
+        
